@@ -1,0 +1,318 @@
+{
+  "contractName": "ConsentRegistry",
+  "solcVersion": "0.8.24+commit.e11b9ed9.Emscripten.clang",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [],
+      "name": "EmptyScope",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotOperator",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "PastExpiry",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "ZeroParty",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "patient",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "requester",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint8",
+          "name": "purpose",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint16",
+          "name": "categoryMask",
+          "type": "uint16"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint64",
+          "name": "expiry",
+          "type": "uint64"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "version",
+          "type": "uint32"
+        }
+      ],
+      "name": "ConsentGranted",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "patient",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "bytes32",
+          "name": "requester",
+          "type": "bytes32"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint8",
+          "name": "purpose",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "version",
+          "type": "uint32"
+        }
+      ],
+      "name": "ConsentRevoked",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOperator",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOperator",
+          "type": "address"
+        }
+      ],
+      "name": "OperatorTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "patient",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "requester",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "purpose",
+          "type": "uint8"
+        }
+      ],
+      "name": "consentOf",
+      "outputs": [
+        {
+          "internalType": "uint16",
+          "name": "categoryMask",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint64",
+          "name": "expiry",
+          "type": "uint64"
+        },
+        {
+          "internalType": "uint32",
+          "name": "version",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "patient",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "requester",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "purpose",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint16",
+          "name": "categoryMask",
+          "type": "uint16"
+        },
+        {
+          "internalType": "uint64",
+          "name": "expiry",
+          "type": "uint64"
+        }
+      ],
+      "name": "grant",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "version",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "patient",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "requester",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "purpose",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint16",
+          "name": "requiredMask",
+          "type": "uint16"
+        }
+      ],
+      "name": "hasConsent",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "operator",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "patient",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "requester",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint8",
+          "name": "purpose",
+          "type": "uint8"
+        }
+      ],
+      "name": "revoke",
+      "outputs": [
+        {
+          "internalType": "uint32",
+          "name": "version",
+          "type": "uint32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalGrants",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "totalRevocations",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOperator",
+          "type": "address"
+        }
+      ],
+      "name": "transferOperator",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561000f575f80fd5b505f80546001600160a01b0319163390811782556040519091907f74da04524d50c64947f5dd5381ef1a4dca5cba8ed1d816243f9e48aa0b5617ed908290a36107d48061005b5f395ff3fe608060405234801561000f575f80fd5b5060043610610085575f3560e01c806364ec5f361161005857806364ec5f3614610118578063af0453241461015a578063d9211be81461016d578063ddae3b1214610184575f80fd5b806315a138f81461008957806329605e77146100b157806353c314b2146100c6578063570ca735146100ee575b5f80fd5b61009c610097366004610648565b61018d565b60405190151581526020015b60405180910390f35b6100c46100bf36600461068b565b610212565b005b6100d96100d43660046106b8565b6102b2565b60405163ffffffff90911681526020016100a8565b5f54610100906001600160a01b031681565b6040516001600160a01b0390911681526020016100a8565b61012b61012636600461071b565b610467565b6040805161ffff909416845267ffffffffffffffff909216602084015263ffffffff16908201526060016100a8565b6100d961016836600461071b565b6104d7565b61017660015481565b6040519081526020016100a8565b61017660025481565b5f8060035f61019d8888886105e0565b815260208082019290925260409081015f208151606081018352905461ffff8116825262010000810467ffffffffffffffff16938201849052600160501b900463ffffffff1691810191909152915042106101fb575f91505061020a565b5161ffff808416918416161490505b949350505050565b5f546001600160a01b0316331461023c57604051631f0853c160e21b815260040160405180910390fd5b6001600160a01b038116610263576040516360e58be760e11b815260040160405180910390fd5b5f80546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f74da04524d50c64947f5dd5381ef1a4dca5cba8ed1d816243f9e48aa0b5617ed9190a35050565b5f80546001600160a01b031633146102dd57604051631f0853c160e21b815260040160405180910390fd5b8515806102e8575084155b15610306576040516360e58be760e11b815260040160405180910390fd5b8261ffff165f0361032a5760405163d635cfa960e01b815260040160405180910390fd5b428267ffffffffffffffff16116103545760405163ad756f5b60e01b815260040160405180910390fd5b5f60035f6103638989896105e0565b815260208101919091526040015f20805461ffff861669ffffffffffffffffffff19909116176201000067ffffffffffffffff861602178082559091506001908290600a906103c0908490600160501b900463ffffffff16610761565b92506101000a81548163ffffffff021916908363ffffffff1602179055506001805f8282546103ef9190610785565b909155505080546040805161ffff8716815267ffffffffffffffff86166020820152600160501b90920463ffffffff16908201819052925060ff861690879089907f284f2adc89d8a1ffbae658b44f580e9a48a42c76bc244f029558bc52c04b60019060600160405180910390a45095945050505050565b5f805f8060035f6104798989896105e0565b815260208082019290925260409081015f208151606081018352905461ffff811680835262010000820467ffffffffffffffff16948301859052600160501b90910463ffffffff169190920181905290999198509650945050505050565b5f80546001600160a01b0316331461050257604051631f0853c160e21b815260040160405180910390fd5b5f60035f6105118787876105e0565b815260208101919091526040015f20805469ffffffffffffffffffff19168082559091506001908290600a90610555908490600160501b900463ffffffff16610761565b92506101000a81548163ffffffff021916908363ffffffff160217905550600160025f8282546105859190610785565b90915550508054604051600160501b90910463ffffffff16808252925060ff841690859087907f0699409e76c5434c42b9bc92b6b4ec8706eea654ff05549f8e6a71ecacac19f59060200160405180910390a4509392505050565b604080516020808201959095528082019390935260f89190911b6001600160f81b03191660608301528051604181840301815260619092019052805191012090565b803560ff81168114610632575f80fd5b919050565b803561ffff81168114610632575f80fd5b5f805f806080858703121561065b575f80fd5b843593506020850135925061067260408601610622565b915061068060608601610637565b905092959194509250565b5f6020828403121561069b575f80fd5b81356001600160a01b03811681146106b1575f80fd5b9392505050565b5f805f805f60a086880312156106cc575f80fd5b85359450602086013593506106e360408701610622565b92506106f160608701610637565b9150608086013567ffffffffffffffff8116811461070d575f80fd5b809150509295509295909350565b5f805f6060848603121561072d575f80fd5b833592506020840135915061074460408501610622565b90509250925092565b634e487b7160e01b5f52601160045260245ffd5b63ffffffff81811683821601908082111561077e5761077e61074d565b5092915050565b808201808211156107985761079861074d565b9291505056fea2646970667358221220833b8f1836e709e766eda5eefb1184666f41a3e5bc08e0d1fc5b7528c138b45664736f6c63430008180033"
+}

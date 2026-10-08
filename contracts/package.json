@@ -1,0 +1,9 @@
+{
+  "name": "consentchain-contracts",
+  "version": "1.0.0",
+  "private": true,
+  "description": "ConsentRegistry Solidity contract and compiler for ConsentChain.",
+  "license": "MIT",
+  "scripts": { "compile": "node compile.js" },
+  "dependencies": { "solc": "0.8.24" }
+}
