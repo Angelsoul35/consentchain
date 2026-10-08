@@ -23,24 +23,13 @@ boundaries between them.
 
 ## Data flow for one request
 
-```
-┌────────────────────┐   classify()   ┌────────────────────┐
-│  request text      │ ─────────────▶ │ ClassifiedRequest  │
-│ (free language)    │                 │ purpose, mask,     │
-└────────────────────┘                 │ confidence, terms  │
-                                        └─────────┬──────────┘
-                                                  │  evaluate(...)
-                                                  ▼
-                        ┌─────────────────────────────────────────┐
-                        │ registry.consent_of / has_consent         │
-                        │ (ConsentRegistry on-chain)                │
-                        └─────────────────────┬─────────────────────┘
-                                              ▼
-                                   ┌────────────────────┐
-                                   │ AccessOutcome      │
-                                   │ allow/deny/review  │
-                                   │ + reasons          │
-                                   └────────────────────┘
+```mermaid
+flowchart TD
+    REQ["request text<br/>(free language)"] -->|classify| CLS["ClassifiedRequest<br/>purpose · category mask<br/>confidence · top terms"]
+    CLS -->|evaluate| POL{policy}
+    POL -->|"consent_of / has_consent"| REG[("ConsentRegistry<br/>on-chain")]
+    REG --> POL
+    POL --> OUT["AccessOutcome<br/>allow / deny / review<br/>+ reasons"]
 ```
 
 1. The classifier turns the request into a `ClassifiedRequest`: a purpose, a

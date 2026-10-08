@@ -64,19 +64,31 @@ las partes retiradas** del entrenamiento. Así, el fraseo de prueba nunca se vio
 
 ```
 $ python -m consentchain.evaluation
-  purpose accuracy      : 0.92     # 4 clases; el azar es 0.25
-  purpose train-test gap: 0.08     # pequeña -> aprende señal, no plantillas
-  category micro-F1     : 0.88     # multi-etiqueta, con fraseo no visto
+  purpose accuracy      : 0.90-0.94  # 4 clases; el azar es 0.25
+  purpose train-test gap: ~0.07      # pequeña -> aprende señal, no plantillas
+  category micro-F1     : ~0.50      # multi-etiqueta, con vocabulario clínico NO visto
 ```
 
-- **No hay underfitting:** las cifras están muy por encima del azar.
-- **No hay overfitting patológico:** la brecha train-test es pequeña (0.08).
+**El propósito generaliza de verdad:** en peticiones escritas a mano que **no**
+están en el generador —"el fellow de cardiología quiere el ecocardiograma y la
+troponina", "un estudio de cohorte con aprobación del IRB necesita las variantes
+genómicas"— clasifica bien el propósito, y la brecha pequeña confirma que no hay
+under ni overfitting.
 
-Generaliza porque la señal de cada etiqueta está repartida en **vocabulario
-recurrente** (tratamiento reusa *treat/therapy/clinical/care*; laboratorio reusa
-*lab/blood/laboratory*), que los n-gramas de carácter reconocen aunque el fraseo
-exacto esté retirado. En producción habría que reentrenar con peticiones reales,
-y el número a superar es el de frases disjuntas, no el de dentro de distribución.
+**La extracción de categorías es más difícil, y el ~0.5 se reporta con honestidad,
+no inflado.** Esto salió de **probar a mano** (no solo del eval automático): la
+primera versión usaba un vocabulario de juguete y etiquetaba mal términos reales
+como "ecocardiograma" (lo ponía como *demographics*). Ahora el vocabulario incluye
+terminología clínica real (troponina, HbA1c, CBC, MRI, BRCA, PHQ-9, códigos CPT),
+así que reconoce términos comunes — pero etiquetar un término sin **ningún
+pariente** en el vocabulario de entrenamiento es genuinamente difícil, y el F1 de
+frases disjuntas de ~0.5 lo refleja. En producción, la extracción de categorías de
+calidad necesita un NER clínico / una ontología médica o datos reales; aquí el
+modelo demuestra el pipeline y es honesto sobre ese límite. El propósito y el
+modelo de consentimiento on-chain son las partes robustas.
+
+Lección (la que pedía el usuario): un número automático (0.88) **escondía** un
+fallo real que solo se vio **validando a mano** con términos clínicos de verdad.
 
 ## La explicabilidad, paso a paso
 
