@@ -12,6 +12,12 @@ the free-text request into a structured claim — *this purpose, these data
 categories* — checks it against the patient's recorded consent, and returns a
 clear decision with reasons.
 
+[![CI](https://img.shields.io/badge/CI-GitHub%20Actions-blue)](.github/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue)](pyproject.toml)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
+---
+
 ## Why it matters
 
 Consent in healthcare is purpose-bound and category-bound. Agreeing to share
