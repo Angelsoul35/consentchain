@@ -230,9 +230,7 @@ def _split_pool(pool: dict, rng: np.random.Generator, holdout_frac: float):
     return train, test
 
 
-def make_split_datasets(
-    n: int = 1600, seed: int = 13, holdout_frac: float = 0.4
-):
+def make_split_datasets(n: int = 1600, seed: int = 13, holdout_frac: float = 0.4):
     """Phrase-disjoint train/test: test sentences use phrasings unseen in training.
 
     Returns (train_texts, train_yp, train_yc, test_texts, test_yp, test_yc).

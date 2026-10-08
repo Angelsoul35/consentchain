@@ -69,16 +69,12 @@ def evaluate(
             f"patient consent for {purpose.label.lower()} covers all requested categories "
             f"and is still valid (version {consent.version})"
         )
-        return _outcome(
-            Decision.ALLOW, classified, requested_mask, 0, reasons, registry.address
-        )
+        return _outcome(Decision.ALLOW, classified, requested_mask, 0, reasons, registry.address)
 
     if not consent.on_record:
         reasons.append(f"no consent on record for {purpose.label.lower()}")
     elif missing_mask:
-        reasons.append(
-            "consent does not cover: " + ", ".join(category_names(missing_mask))
-        )
+        reasons.append("consent does not cover: " + ", ".join(category_names(missing_mask)))
     else:
         reasons.append("consent has expired")
 

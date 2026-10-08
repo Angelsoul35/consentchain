@@ -67,9 +67,7 @@ class ConsentService:
             "contract_address": self.registry.address,
         }
 
-    def revoke_consent(
-        self, patient_handle: str, requester_handle: str, purpose: Purpose
-    ) -> dict:
+    def revoke_consent(self, patient_handle: str, requester_handle: str, purpose: Purpose) -> dict:
         version = self.registry.revoke(
             party_id(patient_handle), party_id(requester_handle), int(purpose)
         )
@@ -81,9 +79,7 @@ class ConsentService:
             "contract_address": self.registry.address,
         }
 
-    def evaluate_request(
-        self, patient_handle: str, requester_handle: str, text: str
-    ) -> dict:
+    def evaluate_request(self, patient_handle: str, requester_handle: str, text: str) -> dict:
         classified = self.classifier.classify(text)
         outcome: AccessOutcome = evaluate(
             self.registry,

@@ -161,7 +161,5 @@ class Web3RegistryClient:
 
     def has_consent(self, patient, requester, purpose, required_mask) -> bool:
         return bool(
-            self._contract.functions.hasConsent(
-                patient, requester, purpose, required_mask
-            ).call()
+            self._contract.functions.hasConsent(patient, requester, purpose, required_mask).call()
         )

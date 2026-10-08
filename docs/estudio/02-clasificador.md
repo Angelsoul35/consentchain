@@ -64,9 +64,12 @@ las partes retiradas** del entrenamiento. Así, el fraseo de prueba nunca se vio
 
 ```
 $ python -m consentchain.evaluation
-  purpose accuracy      : 0.90-0.94  # 4 clases; el azar es 0.25
-  purpose train-test gap: ~0.07      # pequeña -> aprende señal, no plantillas
-  category micro-F1     : ~0.50      # multi-etiqueta, con vocabulario clínico NO visto
+Phrase-disjoint evaluation (test wording never seen in training):
+  train / test size    : 1600 / 533
+  purpose accuracy     : 0.895     # 4 clases; el azar es 0.25
+  purpose train acc    : 1.0
+  purpose train-test gap: 0.105     # pequeña -> aprende señal, no plantillas
+  category micro-F1    : 0.481      # multi-etiqueta, con vocabulario clínico NO visto
 ```
 
 **El propósito generaliza de verdad:** en peticiones escritas a mano que **no**
@@ -75,14 +78,14 @@ troponina", "un estudio de cohorte con aprobación del IRB necesita las variante
 genómicas"— clasifica bien el propósito, y la brecha pequeña confirma que no hay
 under ni overfitting.
 
-**La extracción de categorías es más difícil, y el ~0.5 se reporta con honestidad,
+**La extracción de categorías es más difícil, y el ~0.48 se reporta con honestidad,
 no inflado.** Esto salió de **probar a mano** (no solo del eval automático): la
 primera versión usaba un vocabulario de juguete y etiquetaba mal términos reales
 como "ecocardiograma" (lo ponía como *demographics*). Ahora el vocabulario incluye
 terminología clínica real (troponina, HbA1c, CBC, MRI, BRCA, PHQ-9, códigos CPT),
 así que reconoce términos comunes — pero etiquetar un término sin **ningún
 pariente** en el vocabulario de entrenamiento es genuinamente difícil, y el F1 de
-frases disjuntas de ~0.5 lo refleja. En producción, la extracción de categorías de
+frases disjuntas de ~0.48 lo refleja. En producción, la extracción de categorías de
 calidad necesita un NER clínico / una ontología médica o datos reales; aquí el
 modelo demuestra el pipeline y es honesto sobre ese límite. El propósito y el
 modelo de consentimiento on-chain son las partes robustas.

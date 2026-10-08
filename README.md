@@ -153,9 +153,12 @@ was never seen in training.
 
 ```
 $ python -m consentchain.evaluation
-  purpose accuracy      : 0.90-0.94  # four-way; chance is 0.25
-  purpose train-test gap: ~0.07      # small -> fits the signal, not the templates
-  category micro-F1     : ~0.50      # multi-label, on *unseen* clinical wording
+Phrase-disjoint evaluation (test wording never seen in training):
+  train / test size    : 1600 / 533
+  purpose accuracy     : 0.895     # four-way; chance is 0.25
+  purpose train acc    : 1.0
+  purpose train-test gap: 0.105     # small -> fits the signal, not the templates
+  category micro-F1    : 0.481      # multi-label, on *unseen* clinical wording
 ```
 
 **Purpose** generalises genuinely well: on hand-written requests that are not in
@@ -164,13 +167,13 @@ troponin trend"*, *"an IRB-approved cohort study needs the genomic variants"* â€
 it classifies the purpose correctly, and the small train/test gap shows it is
 neither underfit nor overfit.
 
-**Category extraction is harder, and the ~0.5 figure is reported honestly rather
+**Category extraction is harder, and the ~0.48 figure is reported honestly rather
 than inflated.** Manual testing (not just the automated eval) drove this: the
 first version used a toy vocabulary and silently mis-tagged real terms like
 "echocardiogram" as *demographics*. The vocabulary now contains real clinical
 terminology (troponin, HbA1c, CBC, MRI, BRCA, PHQ-9, CPT codes), so common terms
 are recognised â€” but tagging a term with *no relative at all* in the training
-vocabulary is genuinely hard, which the phrase-disjoint F1 of ~0.5 reflects.
+vocabulary is genuinely hard, which the phrase-disjoint F1 of ~0.48 reflects.
 Category extraction at production quality needs a clinical NER / medical ontology
 or training on real requests; the model here demonstrates the pipeline and is
 honest about that boundary. Purpose classification and the on-chain consent model

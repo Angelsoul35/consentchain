@@ -28,9 +28,7 @@ def test_service_denies_without_consent(service):
 
 
 def test_service_revoke_flips_decision(service):
-    service.grant_consent(
-        "patient:carol", "clinic:gp", Purpose.TREATMENT, [DataCategory.DIAGNOSES]
-    )
+    service.grant_consent("patient:carol", "clinic:gp", Purpose.TREATMENT, [DataCategory.DIAGNOSES])
     text = "The care team requires the diagnosis history for ongoing clinical care."
     assert service.evaluate_request("patient:carol", "clinic:gp", text)["decision"] == "allow"
     service.revoke_consent("patient:carol", "clinic:gp", Purpose.TREATMENT)
