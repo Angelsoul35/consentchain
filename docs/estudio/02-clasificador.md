@@ -42,13 +42,41 @@ ver **por qué** se leyó la petición de esa forma.
   literalmente los términos con más peso: no hace falta una aproximación posterior.
 - Es **determinista y offline**: entrena con un conjunto sintético fijo, corre en
   local y no necesita ninguna clave ni red.
-- Es **fuerte en esta tarea**: en datos de validación (que el modelo no vio), la
-  precisión de propósito y el F1 de categorías son muy altos, porque el lenguaje
-  de estas peticiones es muy distintivo.
+
+Además del TF-IDF de palabras, usamos **n-gramas de caracteres** (`char_wb`, 3-5)
+combinados con `FeatureUnion`. Los n-gramas de carácter capturan raíces que se
+repiten (*diagnos-*, *imaging*, *genom-*), lo que permite reconocer frases que el
+modelo **no** vio en el entrenamiento. Esto es clave para la honestidad de la
+evaluación (ver abajo).
 
 Un LLM grande sería más robusto ante frases muy distintas, pero perderíamos la
 explicabilidad directa y añadiríamos dependencia externa. La interfaz `classify`
 está pensada para poder cambiar el modelo más adelante sin tocar el resto.
+
+## Evaluación honesta: ni 1.0 ni autoengaño (over/underfitting)
+
+Con datos sintéticos de plantillas, un split aleatorio daría ~1.0 de exactitud, y
+sería **mentira**: train y test compartirían las mismas frases y mediríamos
+memorización, no generalización. Por eso `evaluation.py` hace un **split por
+frases disjuntas**: las aperturas de propósito, las frases de categoría y las
+cláusulas de contexto se parten, y las frases de prueba se construyen **solo con
+las partes retiradas** del entrenamiento. Así, el fraseo de prueba nunca se vio.
+
+```
+$ python -m consentchain.evaluation
+  purpose accuracy      : 0.92     # 4 clases; el azar es 0.25
+  purpose train-test gap: 0.08     # pequeña -> aprende señal, no plantillas
+  category micro-F1     : 0.88     # multi-etiqueta, con fraseo no visto
+```
+
+- **No hay underfitting:** las cifras están muy por encima del azar.
+- **No hay overfitting patológico:** la brecha train-test es pequeña (0.08).
+
+Generaliza porque la señal de cada etiqueta está repartida en **vocabulario
+recurrente** (tratamiento reusa *treat/therapy/clinical/care*; laboratorio reusa
+*lab/blood/laboratory*), que los n-gramas de carácter reconocen aunque el fraseo
+exacto esté retirado. En producción habría que reentrenar con peticiones reales,
+y el número a superar es el de frases disjuntas, no el de dentro de distribución.
 
 ## La explicabilidad, paso a paso
 

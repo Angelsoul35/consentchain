@@ -1,10 +1,13 @@
 """Classify a free-text access request into a purpose and data categories.
 
-The model is deliberately simple and explainable: a TF-IDF vectoriser feeds a
-logistic-regression classifier for the purpose (one of four) and a one-vs-rest
-logistic regression for the categories (a multi-label problem). Both are linear,
-so for any prediction we can read off which words pushed the decision, which is
-exactly what a consent system needs to be auditable.
+The model stays linear and explainable, but uses two TF-IDF views combined in a
+:class:`FeatureUnion` — word unigrams/bigrams (phrasing) and character n-grams
+(``char_wb``, 3-5, which survive synonyms, inflection and typos) — so it
+generalises to wording it was not trained on rather than memorising templates. A
+regularised logistic regression predicts the purpose (one of four) and a
+one-vs-rest logistic regression predicts the categories (multi-label). Being
+linear, each decision can be read off as the words that pushed it, which is what
+a consent system needs to be auditable.
 """
 
 from __future__ import annotations
@@ -15,9 +18,19 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.multiclass import OneVsRestClassifier
+from sklearn.pipeline import FeatureUnion
 
 from .generate import ALL_CATEGORIES, make_dataset
 from .scopes import Purpose, categories_to_mask
+
+
+def _build_features() -> FeatureUnion:
+    return FeatureUnion(
+        [
+            ("word", TfidfVectorizer(analyzer="word", ngram_range=(1, 2), min_df=2)),
+            ("char", TfidfVectorizer(analyzer="char_wb", ngram_range=(3, 5), min_df=2)),
+        ]
+    )
 
 
 @dataclass
@@ -32,9 +45,9 @@ class ClassifiedRequest:
 class RequestClassifier:
     def __init__(self, category_threshold: float = 0.5) -> None:
         self.category_threshold = category_threshold
-        self._vectorizer = TfidfVectorizer(ngram_range=(1, 2), min_df=2)
-        self._purpose = LogisticRegression(max_iter=1000, C=4.0)
-        self._category = OneVsRestClassifier(LogisticRegression(max_iter=1000, C=4.0))
+        self._features = _build_features()
+        self._purpose = LogisticRegression(max_iter=2000, C=2.0)
+        self._category = OneVsRestClassifier(LogisticRegression(max_iter=2000, C=2.0))
         self._fitted = False
 
     def fit(
@@ -45,7 +58,7 @@ class RequestClassifier:
     ) -> RequestClassifier:
         if texts is None:
             texts, y_purpose, y_cat = make_dataset()
-        x = self._vectorizer.fit_transform(texts)
+        x = self._features.fit_transform(texts)
         self._purpose.fit(x, y_purpose)
         self._category.fit(x, y_cat)
         self._fitted = True
@@ -54,15 +67,22 @@ class RequestClassifier:
     def _explain(self, x_row, predicted_class_index: int, k: int = 4) -> list[tuple[str, float]]:
         coef = self._purpose.coef_[predicted_class_index]
         contributions = x_row.toarray().ravel() * coef
-        terms = self._vectorizer.get_feature_names_out()
+        names = self._features.get_feature_names_out()
         order = np.argsort(contributions)[::-1]
-        top = [(terms[i], round(float(contributions[i]), 4)) for i in order if contributions[i] > 0]
-        return top[:k]
+        top: list[tuple[str, float]] = []
+        for i in order:
+            if contributions[i] <= 0:
+                break
+            if names[i].startswith("word__"):
+                top.append((names[i].removeprefix("word__"), round(float(contributions[i]), 4)))
+            if len(top) >= k:
+                break
+        return top
 
     def classify(self, text: str) -> ClassifiedRequest:
         if not self._fitted:
             raise RuntimeError("Classifier is not fitted. Call fit() first.")
-        x = self._vectorizer.transform([text])
+        x = self._features.transform([text])
 
         proba = self._purpose.predict_proba(x)[0]
         class_index = int(np.argmax(proba))

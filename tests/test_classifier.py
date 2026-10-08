@@ -2,11 +2,9 @@ from __future__ import annotations
 
 import numpy as np
 import pytest
-from sklearn.metrics import accuracy_score, f1_score
-from sklearn.model_selection import train_test_split
 
 from consentchain.classifier import RequestClassifier
-from consentchain.generate import make_dataset
+from consentchain.evaluation import phrase_disjoint_eval
 from consentchain.scopes import Purpose
 
 
@@ -35,20 +33,17 @@ def test_unfitted_classifier_raises():
         RequestClassifier().classify("anything")
 
 
-def test_held_out_accuracy_is_high():
-    texts, yp, yc = make_dataset(n=1200, seed=5)
-    x_tr, x_te, yp_tr, yp_te, yc_tr, yc_te = train_test_split(
-        texts, yp, yc, test_size=0.25, random_state=0
-    )
-    clf = RequestClassifier().fit(x_tr, yp_tr, yc_tr)
-
-    pred_purpose = [int(clf.classify(t).purpose) for t in x_te]
-    assert accuracy_score(yp_te, pred_purpose) > 0.95
-
-    x_vec = clf._vectorizer.transform(x_te)
-    proba = clf._category.predict_proba(x_vec)
-    pred_cat = (proba >= 0.5).astype(int)
-    assert f1_score(yc_te, pred_cat, average="micro", zero_division=0) > 0.9
+def test_phrase_disjoint_generalisation_and_no_overfit():
+    # Honest evaluation: train on one pool of phrasings, test on a disjoint pool,
+    # so the test wording is unseen. Within-distribution accuracy would be a
+    # misleading ~1.0; this measures real generalisation.
+    report = phrase_disjoint_eval()
+    # Not underfit: generalises well above chance (0.25 for four purposes).
+    assert report.purpose_accuracy >= 0.75
+    assert report.category_micro_f1 >= 0.70
+    # Not pathologically overfit: fits the signal, with a bounded train-test gap.
+    assert report.purpose_train_accuracy >= 0.95
+    assert report.purpose_gap <= 0.25
 
 
 def test_category_fallback_picks_most_likely():
