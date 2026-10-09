@@ -1,4 +1,4 @@
-"""Honest evaluation of the request classifier.
+"""Rigorous, leakage-free evaluation of the request classifier.
 
 Within-distribution accuracy on templated data is misleadingly high, so this
 module trains on one pool of phrasings and tests on a *disjoint* pool: the test

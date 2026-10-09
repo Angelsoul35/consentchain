@@ -88,4 +88,4 @@ rápidas y permite usar la API sin cadena.
 - Solo datos estructurales y `bytes32`: **sin** nombres ni datos clínicos.
 - `onlyOperator` + guardas con errores personalizados → nadie falsifica consentimiento.
 - Los eventos versionados reconstruyen todo el historial.
-- El fake, validado contra el contrato, mantiene las pruebas rápidas y honestas.
+- El fake, validado contra el contrato, mantiene las pruebas rápidas y rigurosas.

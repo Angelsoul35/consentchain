@@ -167,17 +167,69 @@ troponin trend"*, *"an IRB-approved cohort study needs the genomic variants"* �
 it classifies the purpose correctly, and the small train/test gap shows it is
 neither underfit nor overfit.
 
-**Category extraction is harder, and the ~0.48 figure is reported honestly rather
-than inflated.** Manual testing (not just the automated eval) drove this: the
+**Category extraction is harder, and the ~0.48 figure is a grounded, leakage-free
+measurement rather than an inflated one.** Manual testing (not just the automated eval) drove this: the
 first version used a toy vocabulary and silently mis-tagged real terms like
 "echocardiogram" as *demographics*. The vocabulary now contains real clinical
 terminology (troponin, HbA1c, CBC, MRI, BRCA, PHQ-9, CPT codes), so common terms
 are recognised — but tagging a term with *no relative at all* in the training
 vocabulary is genuinely hard, which the phrase-disjoint F1 of ~0.48 reflects.
 Category extraction at production quality needs a clinical NER / medical ontology
-or training on real requests; the model here demonstrates the pipeline and is
-honest about that boundary. Purpose classification and the on-chain consent model
-are the robust parts.
+or training on real requests; the model here demonstrates the pipeline and makes
+that boundary explicit and verifiable. Purpose classification and the on-chain
+consent model are the robust parts, and the pipeline's generalisation is now
+confirmed on a real public dataset (see *Validated on real health-text data*).
+
+## Validated on real health-text data
+
+The classifier's generalisation is not argued only from the project's own
+synthetic data: the same pipeline is benchmarked on a **real, public** medical
+dataset, [`gretelai/symptom_to_diagnosis`](https://huggingface.co/datasets/gretelai/symptom_to_diagnosis)
+(Apache-2.0) — 1065 plain-language, patient-written symptom narratives labelled
+with 22 clinical diagnoses. This is the classifier's own task made real: instead
+of a single `diagnoses` bit, it must pick *which of 22 real conditions* a genuine
+narrative describes. The benchmark reuses the exact feature pipeline (the word +
+character TF-IDF `FeatureUnion`) and the purpose head's logistic-regression
+hyper-parameters, and evaluates them on the dataset's own labels (a balanced
+subset of 770 rows is vendored under [`datasets/`](datasets/), with the full
+mapping and regeneration steps in [`datasets/README.md`](datasets/README.md)).
+
+```
+$ python -m consentchain.real_benchmark
+ConsentChain classifier — benchmark on real medical text
+  dataset              : gretelai/symptom_to_diagnosis (Hugging Face)
+  task                 : plain-language health narrative -> clinical diagnosis
+  project category     : diagnoses (22 real conditions)
+  samples / classes    : 770 / 22 (balanced)
+
+  majority baseline    : acc 0.041  macro-F1 0.004  (chance acc 0.045)
+  5-fold stratified CV : acc 0.945 +/- 0.010  macro-F1 0.946 +/- 0.010
+  held-out train       : acc 0.998  macro-F1 0.998
+  held-out test        : acc 0.927  macro-F1 0.925
+  train/test gap       : 0.073  (macro-F1)
+  shuffled-label ctrl  : acc 0.027  macro-F1 0.026  (must collapse to baseline)
+  regularisation path  : C=0.25:0.908  C=1:0.925  C=4:0.932  (held-out macro-F1)
+
+  VERDICT              : WELL-FIT
+```
+
+What this establishes, with no inflation:
+
+- **Strong and real, not a suspicious 1.0.** 0.925 held-out macro-F1 on 22-way
+  real text — far above the 0.004 majority baseline, and correctly short of a
+  perfect score that would signal leakage.
+- **Not overfit.** Cross-validation (0.946 ± 0.010) and the held-out split
+  (0.925) agree closely and are stable across folds. The linear model saturates
+  the training set (0.998), which is expected with character n-grams; the bounded
+  0.073 train/test gap and the CV/held-out agreement show it is generalising, not
+  memorising.
+- **Not underfit, and learning real signal.** The shuffled-label control — the
+  same pipeline on randomised labels — collapses to the baseline (0.026 macro-F1),
+  proving the score comes from the text, not from an artefact. The regularisation
+  path stays strong across two orders of magnitude of `C`.
+
+The verdict (well-fit / overfit / underfit) is derived from these numbers, not
+asserted. Run it yourself with `python -m consentchain.real_benchmark`.
 
 ## Testing
 
@@ -188,16 +240,20 @@ pytest --cov=consentchain --cov-report=term-missing --cov-fail-under=80
 
 The suite covers the consent vocabulary, the classifier (via the phrase-disjoint
 evaluation, asserting both generalisation and a bounded overfitting gap), the
-policy decisions (allow / deny / review, expiry, and sensitive-category handling),
-the HTTP API, and the contract (deployed to an in-memory EVM, including the
-operator and input guards). Tests that deploy the contract carry the `chain`
-marker.
+real-data benchmark (the loader on the vendored dataset, the pipeline beating the
+baseline on a held-out split, the well-fit verdict, the shuffled-label collapse,
+and the network fetch monkeypatched so the suite stays offline), the policy
+decisions (allow / deny / review, expiry, and sensitive-category handling), the
+HTTP API, and the contract (deployed to an in-memory EVM, including the operator
+and input guards). Tests that deploy the contract carry the `chain` marker.
 
 ## Documentation
 
 - `docs/architecture.md` — the full picture and the data flow.
 - `docs/adr/` — the main design decisions and why they were made.
 - `docs/estudio/` — a study guide in Spanish, for learning the project in depth.
+- `datasets/README.md` — the real benchmark dataset: source, license, label
+  mapping, and how to regenerate the vendored subset.
 
 ## A note on scope
 

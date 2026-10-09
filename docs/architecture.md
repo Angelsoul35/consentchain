@@ -12,6 +12,8 @@ boundaries between them.
 | Vocabulary     | `consentchain/scopes.py`          | Purposes, data categories, and the category bitmask          |
 | Data           | `consentchain/generate.py`        | Synthetic, labelled access requests for training             |
 | Classifier     | `consentchain/classifier.py`      | Request text → purpose + categories + explanation            |
+| Benchmark data | `consentchain/real_data.py`       | Load a real public medical dataset (vendored balanced subset)|
+| Benchmark      | `consentchain/real_benchmark.py`  | Benchmark the pipeline on real text (CV + held-out + verdict)|
 | Policy         | `consentchain/policy.py`          | Decide allow / deny / review against the consent on record   |
 | Orchestration  | `consentchain/service.py`         | Grant, revoke, and evaluate requests end to end              |
 | Registry client| `consentchain/chain/registry.py`  | Talk to the contract (or an in-memory fake)                  |
